@@ -27,4 +27,22 @@ Which zones are trending worse, which are worth watching, and what's driving it.
 Not a forecast and not safety advice. No accident or fatality data.
 
 ## Status
-Work in progress.
+- **COMPLETED**
+  - Repo and seed file
+  - Read station seed file
+- **IN PROGRESS**
+  - Station metadata
+- **NOT STARTED**
+  - SNOTEL backfill
+  - CAIC observations pull
+  - Data cleaning + issues log
+  - Zone trend flags
+  - Warning-sign extraction from field reports, via LLM
+  - App, publicly hosted, with a daily refresh
+
+## How I built this
+I wrote all code myself; I used Claude as a coach and code reviewer.
+
+## Data sources
+- **CAIC**: avalanche observations and field reports, from the [Avalanche Explorer](https://prod.avalanche.state.co.us/observations)
+- **NRCS SNOTEL**: daily snowpack readings, via the [AWDB REST API](https://wcc.sc.egov.usda.gov/awdbRestApi/swagger-ui/index.html)
