@@ -24,26 +24,11 @@ with open('stations_seed.csv', newline='') as csvfile:
         # 2. Validate seed rows
         clean_id = stripped_id(row['station_id'])
         if clean_id == "":
-            blank_value_dict = {
-                "row": index,
-                "value": clean_id,
-                "reason": "blank value"
-            }
-            error_log_stations_id.append(blank_value_dict)
+            error_log_stations_id.append({"row": index, "value": clean_id, "reason": "blank value"})
         elif not is_digit(clean_id):
-            string_value_dict = {
-                "row": index,
-                "value": clean_id,
-                "reason": "not a number"
-            }
-            error_log_stations_id.append(string_value_dict)
+            error_log_stations_id.append({"row": index, "value": clean_id, "reason": "not a number"})
         elif clean_id in seen_id:
-            dup_dict = {
-                "row": index,
-                "value": clean_id,
-                "reason": "duplicate id"
-            }
-            error_log_stations_id.append(dup_dict)
+            error_log_stations_id.append({"row": index, "value": clean_id, "reason": "duplicate id"})
         else:
             seen_id.add(clean_id)
             row['station_id'] = clean_id
