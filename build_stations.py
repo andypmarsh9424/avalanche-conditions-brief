@@ -1,8 +1,11 @@
 import csv
 def is_digit(seed_id):
     return seed_id.isdigit()
+
+
 def stripped_id(seed_id):
     return seed_id.strip()
+
 # Read in stations_seed.csv
 # Validate seed rows
 # Build triplets
@@ -24,7 +27,7 @@ with open('stations_seed.csv', newline='') as csvfile:
             blank_value_dict = {
                 "row": index,
                 "value": clean_id,
-                "reason" : "blank value"
+                "reason": "blank value"
             }
             error_log_stations_id.append(blank_value_dict)
         elif not is_digit(clean_id):
