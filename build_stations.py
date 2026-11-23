@@ -42,30 +42,46 @@ with open('stations_seed.csv', newline='') as csvfile:
 triplets = [
     build_triplets(
         row['station_id'],
-        row.get('state', "CO"),
-        row.get('network', "SNTL")
     )
-
     for row in clean_stations
 ]
 
 url = "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/stations"
-payholder = {"stationTriplets": ",".join(triplets)}
+payload = {"stationTriplets": ",".join(triplets)}
 
-returned = []
+error_log_api = []
+station_id_misaligned = []
+api_return = []
 
 try:
-    response = requests.get(url, params=payholder, timeout=10)
+    response = requests.get(url, params=payload, timeout=10)
     response.raise_for_status()
-    print("Success", response.json())
-    response_code = response.status_code
+    # Check if what was returned aligns with that was requested
+    response_check =len(response.json())
+    if response_check != len(clean_stations):
+        print("Response count does not match clean stations count")
+        error_log_api.append({"reason": "Response count does not match clean stations count", "sent": len(clean_stations), "returned": response_check, "triplets": payload['stationTriplets']})
+        returned_ids = []
+        sent_ids = []
+        for returnedId in response.json():
+            returned_ids.append(returnedId['stationId'])
+        for sentId in clean_stations:
+            sent_ids.append(sentId['station_id'])
+        misaligned_id = list(set(sent_ids) - set(returned_ids))
+        station_id_misaligned.append({"misalignedId": misaligned_id, "action": "Remove this id from the stations_seed.csv"})
+    else:
+        for returnedId in response.json():
+            api_return.append({"StationName": returnedId['name'], "Elevation": returnedId["elevation"]})
+        response_code = response.status_code
 except requests.exceptions.Timeout:
     print("Request timed out")
 except requests.exceptions.RequestException as e:
     print("Request failed", e)
 
 
-print(f"Clean Stations: {len(clean_stations)} | Errors Logged: {len(error_log_stations_id)}")
+print(f"Clean Stations: {len(clean_stations)} | Errors Logged: {len(error_log_stations_id) +len(error_log_api)}")
 print(error_log_stations_id)
-
+print(error_log_api)
+print(station_id_misaligned)
+print(api_return)
 
