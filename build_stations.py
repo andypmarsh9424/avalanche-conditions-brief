@@ -49,17 +49,24 @@ triplets = [
 url = "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/stations"
 payload = {"stationTriplets": ",".join(triplets)}
 
+
 error_log_api = []
 station_id_misaligned = []
 api_return = []
+response_code = []
 
 try:
     response = requests.get(url, params=payload, timeout=10)
     response.raise_for_status()
+    response_code.append(response.status_code)
     # Check if what was returned aligns with that was requested
     api_response = response.json()
     response_check =len(api_response)
+    for returnedId in api_response:
+        # Still provide api response, so one misaligned id does not impact chain
+        api_return.append({"StationName": returnedId['name'], "Elevation": returnedId["elevation"]})
     if response_check != len(clean_stations):
+        # If an id that was sent, was not returned, log it
         print("Response count does not match clean stations count")
         error_log_api.append({"reason": "Response count does not match clean stations count", "sent": len(clean_stations), "returned": response_check, "triplets": payload['stationTriplets']})
         returned_ids = []
@@ -70,14 +77,10 @@ try:
             sent_ids.append(sentId['station_id'])
         misaligned_id = list(set(sent_ids) - set(returned_ids))
         station_id_misaligned.append({"misalignedId": misaligned_id, "action": "Remove this id from the stations_seed.csv"})
-    else:
-        for returnedId in api_response:
-            api_return.append({"StationName": returnedId['name'], "Elevation": returnedId["elevation"]})
-        response_code = response.status_code
 except requests.exceptions.Timeout:
-    print("Request timed out")
+    error_log_api.append({"reason": "Request timed out"})
 except requests.exceptions.RequestException as e:
-    print("Request failed", e)
+    error_log_api.append({"reason": "request failed", "detail": str(e)})
 
 
 print(f"Clean Stations: {len(clean_stations)} | Errors Logged: {len(error_log_stations_id) +len(error_log_api)}")
@@ -85,5 +88,8 @@ print(error_log_stations_id)
 print(error_log_api)
 print(station_id_misaligned)
 print(api_return)
+print(response_code)
+
+
 
 
