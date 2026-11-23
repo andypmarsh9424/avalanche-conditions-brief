@@ -57,20 +57,21 @@ try:
     response = requests.get(url, params=payload, timeout=10)
     response.raise_for_status()
     # Check if what was returned aligns with that was requested
-    response_check =len(response.json())
+    api_response = response.json()
+    response_check =len(api_response)
     if response_check != len(clean_stations):
         print("Response count does not match clean stations count")
         error_log_api.append({"reason": "Response count does not match clean stations count", "sent": len(clean_stations), "returned": response_check, "triplets": payload['stationTriplets']})
         returned_ids = []
         sent_ids = []
-        for returnedId in response.json():
+        for returnedId in api_response:
             returned_ids.append(returnedId['stationId'])
         for sentId in clean_stations:
             sent_ids.append(sentId['station_id'])
         misaligned_id = list(set(sent_ids) - set(returned_ids))
         station_id_misaligned.append({"misalignedId": misaligned_id, "action": "Remove this id from the stations_seed.csv"})
     else:
-        for returnedId in response.json():
+        for returnedId in api_response:
             api_return.append({"StationName": returnedId['name'], "Elevation": returnedId["elevation"]})
         response_code = response.status_code
 except requests.exceptions.Timeout:
@@ -84,4 +85,5 @@ print(error_log_stations_id)
 print(error_log_api)
 print(station_id_misaligned)
 print(api_return)
+
 
