@@ -38,7 +38,7 @@ with open('stations_seed.csv', newline='') as csvfile:
             row['station_id'] = clean_id
             clean_stations.append(row)
 
-# Call stations
+# Call /stations once with all triplets
 triplets = [
     build_triplets(
         row['station_id'],
@@ -59,7 +59,7 @@ try:
     response = requests.get(url, params=payload, timeout=10)
     response.raise_for_status()
     response_code.append(response.status_code)
-    # Check if what was returned aligns with that was requested
+    # Check stations returned matches stations sent
     api_response = response.json()
     response_check =len(api_response)
     for returnedId in api_response:
@@ -82,6 +82,10 @@ except requests.exceptions.Timeout:
 except requests.exceptions.RequestException as e:
     error_log_api.append({"reason": "request failed", "detail": str(e)})
 
+# Write stations.csv
+look_up = {}
+for station in clean_stations:
+    look_up.update({station['station_id']: station})
 
 print(f"Clean Stations: {len(clean_stations)} | Errors Logged: {len(error_log_stations_id) +len(error_log_api)}")
 print(error_log_stations_id)
@@ -89,6 +93,7 @@ print(error_log_api)
 print(station_id_misaligned)
 print(api_return)
 print(response_code)
+print(look_up)
 
 
 
