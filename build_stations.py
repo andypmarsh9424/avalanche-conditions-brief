@@ -29,10 +29,13 @@ with open('stations_seed.csv', newline='') as csvfile:
         clean_id = stripped_id(row['station_id'])
         if clean_id == "":
             error_log_stations_id.append({"row": index, "value": clean_id, "reason": "blank value"})
+            print(error_log_stations_id)
         elif not is_digit(clean_id):
             error_log_stations_id.append({"row": index, "value": clean_id, "reason": "not a number"})
+            print(error_log_stations_id)
         elif clean_id in seen_id:
             error_log_stations_id.append({"row": index, "value": clean_id, "reason": "duplicate id"})
+            print(error_log_stations_id)
         else:
             seen_id.add(clean_id)
             row['station_id'] = clean_id
@@ -77,39 +80,36 @@ try:
             sent_ids.append(sentId['station_id'])
         misaligned_id = list(set(sent_ids) - set(returned_ids))
         station_id_misaligned.append({"misalignedId": misaligned_id, "action": "Remove this id from the stations_seed.csv"})
+        print(station_id_misaligned)
+    # Write stations.csv
+    look_up = {}
+    for station in clean_stations:
+        look_up.update({station['station_id']: station})
+
+    station_output = []
+    for station in api_response:
+        station_dict = {
+            "station_name": station['name'],
+            "station_id": look_up[station['stationId']]['station_id'],
+            "elevation_ft": station['elevation'],
+            "latitude": station['latitude'],
+            "longitude": station['longitude'],
+            "county": station['countyName'],
+            "caic_zone": "",
+            "reason": look_up[station['stationId']]['reason']
+        }
+        station_output.append(station_dict)
 except requests.exceptions.Timeout:
     error_log_api.append({"reason": "Request timed out"})
+    print(error_log_api)
 except requests.exceptions.RequestException as e:
     error_log_api.append({"reason": "request failed", "detail": str(e)})
+    print(error_log_api)
 
-# Write stations.csv
-look_up = {}
-for station in clean_stations:
-    look_up.update({station['station_id']: station})
 
-station_output = []
-for station in api_response:
-    station_dict = {
-        "station_name": station['name'],
-        "station_id": look_up[station['stationId']]['station_id'],
-        "elevation_ft": station['elevation'],
-        "latitude": station['latitude'],
-        "longitude": station['longitude'],
-        "county": station['countyName'],
-        "caic_zone": "",
-        "reason": look_up[station['stationId']]['reason']
-    }
-    station_output.append(station_dict)
 
 print(f"Clean Stations: {len(clean_stations)} | Errors Logged: {len(error_log_stations_id) +len(error_log_api)}")
-print(error_log_stations_id)
-print(error_log_api)
-print(station_id_misaligned)
-print(api_return)
-print(response_code)
-print(look_up)
-print(station_output)
-print(len(station_output))
+
 
 
 
