@@ -87,6 +87,20 @@ look_up = {}
 for station in clean_stations:
     look_up.update({station['station_id']: station})
 
+station_output = []
+for station in api_response:
+    station_dict = {
+        "station_name": station['name'],
+        "station_id": look_up[station['stationId']]['station_id'],
+        "elevation_ft": station['elevation'],
+        "latitude": station['latitude'],
+        "longitude": station['longitude'],
+        "county": station['countyName'],
+        "caic_zone": "",
+        "reason": look_up[station['stationId']]['reason']
+    }
+    station_output.append(station_dict)
+
 print(f"Clean Stations: {len(clean_stations)} | Errors Logged: {len(error_log_stations_id) +len(error_log_api)}")
 print(error_log_stations_id)
 print(error_log_api)
@@ -94,6 +108,13 @@ print(station_id_misaligned)
 print(api_return)
 print(response_code)
 print(look_up)
+print(station_output)
+print(len(station_output))
+
+
+
+
+
 
 
 
