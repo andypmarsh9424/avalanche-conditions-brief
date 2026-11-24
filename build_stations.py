@@ -81,7 +81,7 @@ try:
         misaligned_id = list(set(sent_ids) - set(returned_ids))
         station_id_misaligned.append({"misalignedId": misaligned_id, "action": "Remove this id from the stations_seed.csv"})
         print(station_id_misaligned)
-    # Write stations.csv
+    # Prep for stations.csv
     look_up = {}
     for station in clean_stations:
         look_up.update({station['station_id']: station})
@@ -99,6 +99,13 @@ try:
             "reason": look_up[station['stationId']]['reason']
         }
         station_output.append(station_dict)
+    # Write stations.csv
+    with open('stations.csv', 'w', newline='') as csvfile:
+        fieldnames = station_output[0].keys()
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+        writer.writerows(station_output)
 except requests.exceptions.Timeout:
     error_log_api.append({"reason": "Request timed out"})
     print(error_log_api)
