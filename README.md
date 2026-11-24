@@ -23,15 +23,23 @@ Which zones are trending worse, which are worth watching, and what's driving it.
 - Updated automatically every day.
 - Quick enough for a morning conditions check.
 
+## How to run
+1. `python -m venv .venv` 
+2. `.venv\Scripts\activate` (Windows) or `source .venv/bin/activate` (Mac/Linux)
+3. `pip install -r requirements.txt` (Python 3.11, no API key needed)
+4. Add the SNOTEL stations you want to track (ID, name, county, reason) to stations_seed.csv
+5. `python build_stations.py` 
+6. More steps will be added as the pipeline grows
+
 ## Out of scope
 Not a forecast and not safety advice. No accident or fatality data.
 
 ## Status
 - **COMPLETED**
   - Repo and seed file
-  - Read station seed file
+  - Station pipeline: validates the seed file, fetches metadata from the AWDB API with count checks and failure handling, writes stations.csv
 - **IN PROGRESS**
-  - Station metadata
+  - Write the station pipeline's error logs to logs/ instead of printing them
 - **NOT STARTED**
   - SNOTEL backfill
   - CAIC observations pull
@@ -44,5 +52,5 @@ Not a forecast and not safety advice. No accident or fatality data.
 I wrote all code myself; I used Claude as a coach and code reviewer.
 
 ## Data sources
-- **CAIC**: avalanche observations and field reports, from the [Avalanche Explorer](https://prod.avalanche.state.co.us/observations)
+- **CAIC**: avalanche observations and field reports, from the [Avalanche Explorer](https://forecasts.avalanche.state.co.us/explorer/)
 - **NRCS SNOTEL**: daily snowpack readings, via the [AWDB REST API](https://wcc.sc.egov.usda.gov/awdbRestApi/swagger-ui/index.html)
