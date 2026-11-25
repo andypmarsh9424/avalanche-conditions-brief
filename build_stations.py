@@ -1,5 +1,8 @@
 import csv
 import requests
+from datetime import datetime as dt
+import json
+import os
 def is_digit(seed_id):
     return seed_id.isdigit()
 
@@ -9,6 +12,12 @@ def stripped_id(seed_id):
 
 def build_triplets(station_id, state="CO", network="SNTL"):
     return f"{station_id}:{state}:{network}"
+
+def log_status(api_errors, seed_id_errors):
+    if api_errors == 0 and seed_id_errors == 0:
+        return "SUCCESS"
+    else:
+        return "ERROR"
 
 # Read in stations_seed.csv
 # Validate seed rows
@@ -53,10 +62,16 @@ url = "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/stations"
 payload = {"stationTriplets": ",".join(triplets)}
 
 
+
 error_log_api = []
 station_id_misaligned = []
 api_return = []
 response_code = []
+
+# Default values for values in log.json if timeout error occurs
+response_check = None
+rows_written = 0
+csv_written = False
 
 try:
     response = requests.get(url, params=payload, timeout=10)
@@ -113,6 +128,8 @@ try:
 
             writer.writeheader()
             writer.writerows(station_output)
+            csv_written = True
+            rows_written = len(station_output)
 except requests.exceptions.Timeout:
     error_log_api.append({"reason": "Request timed out"})
     print(error_log_api)
@@ -124,13 +141,22 @@ except requests.exceptions.RequestException as e:
 
 print(f"Clean Stations: {len(clean_stations)} | Errors Logged: {len(error_log_stations_id) +len(error_log_api)}")
 
+# Write logs
+status = log_status(len(error_log_api), len(error_log_stations_id))
+run_time = dt.now().strftime('%Y-%m-%d_%H%M%S')
+run_logs = {
+    "timestamp": run_time,
+    "status": status,
+    "seed_rows_clean": len(clean_stations),
+    "sent": len(clean_stations),
+    "returned": response_check,
+    "rows_written": rows_written,
+    "csv_written": csv_written,
+    "errors_api": error_log_api,
+    "errors_seed": error_log_stations_id,
+    "missing_ids": station_id_misaligned
+}
 
-
-
-
-
-
-
-
-
-
+os.makedirs('logs', exist_ok=True)
+with open(f"logs/build_stations_{run_time}.json", 'w') as f:
+    json.dump(run_logs, f, indent=2)
