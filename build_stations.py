@@ -68,8 +68,13 @@ try:
     for returnedId in api_response:
         # Still provide api response, so one misaligned id does not impact chain
         api_return.append({"StationName": returnedId['name'], "Elevation": returnedId["elevation"]})
-    if response_check != len(clean_stations):
-        # If an id that was sent, was not returned, log it
+    if response_check == 0:
+        # log if API provides no stations
+        error_log_api.append(
+            {"reason": "No stations sent back by the API", "sent": len(clean_stations),
+             "returned": response_check, "triplets": payload['stationTriplets']})
+    elif response_check > 0 and response_check != len(clean_stations):
+        # If an id that was sent was not returned AND we did get a response, log it
         print("Response count does not match clean stations count")
         error_log_api.append({"reason": "Response count does not match clean stations count", "sent": len(clean_stations), "returned": response_check, "triplets": payload['stationTriplets']})
         returned_ids = []
@@ -81,6 +86,7 @@ try:
         misaligned_id = list(set(sent_ids) - set(returned_ids))
         station_id_misaligned.append({"misalignedId": misaligned_id, "action": "Remove this id from the stations_seed.csv"})
         print(station_id_misaligned)
+
     # Prep for stations.csv
     look_up = {}
     for station in clean_stations:
@@ -99,13 +105,14 @@ try:
             "reason": look_up[station['stationId']]['reason']
         }
         station_output.append(station_dict)
-    # Write stations.csv
-    with open('stations.csv', 'w', newline='') as csvfile:
-        fieldnames = station_output[0].keys()
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    # Write stations.csv - if no stations are returned, do not overwrite last successful load
+    if len(station_output) > 0:
+        with open('stations.csv', 'w', newline='') as csvfile:
+            fieldnames = station_output[0].keys()
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-        writer.writeheader()
-        writer.writerows(station_output)
+            writer.writeheader()
+            writer.writerows(station_output)
 except requests.exceptions.Timeout:
     error_log_api.append({"reason": "Request timed out"})
     print(error_log_api)
@@ -116,6 +123,7 @@ except requests.exceptions.RequestException as e:
 
 
 print(f"Clean Stations: {len(clean_stations)} | Errors Logged: {len(error_log_stations_id) +len(error_log_api)}")
+
 
 
 
