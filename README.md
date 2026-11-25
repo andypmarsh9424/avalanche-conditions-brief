@@ -29,7 +29,8 @@ Which zones are trending worse, which are worth watching, and what's driving it.
 3. `pip install -r requirements.txt` (Python 3.11, no API key needed)
 4. Add the SNOTEL stations you want to track (ID, name, county, reason) to stations_seed.csv
 5. `python build_stations.py` 
-6. More steps will be added as the pipeline grows
+6. Check logs/build_stations_%Y-%m-%d_%H%M%S.json for runtime logs and check 'status' 
+7. More steps will be added as the pipeline grows
 
 ## Out of scope
 Not a forecast and not safety advice. No accident or fatality data.
@@ -38,10 +39,10 @@ Not a forecast and not safety advice. No accident or fatality data.
 - **COMPLETED**
   - Repo and seed file
   - Station pipeline: validates the seed file, fetches metadata from the AWDB API with count checks and failure handling, writes stations.csv
+  - Wrote the station pipeline's error logs to logs/ instead of printing them in build_stations_%Y-%m-%d_%H%M%S.json
 - **IN PROGRESS**
-  - Write the station pipeline's error logs to logs/ instead of printing them
-- **NOT STARTED**
   - SNOTEL backfill
+- **NOT STARTED**
   - CAIC observations pull
   - Data cleaning + issues log
   - Zone trend flags
