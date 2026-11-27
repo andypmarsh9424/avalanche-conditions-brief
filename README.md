@@ -50,7 +50,7 @@ Not a forecast and not safety advice. No accident or fatality data.
   - App, publicly hosted, with a daily refresh
 
 ## How I built this
-I wrote all code myself; I used Claude as a coach and code reviewer.
+I designed and coded this project myself, using Claude as a coach, code reviewer and syntax reference.
 
 ## Data sources
 - **CAIC**: avalanche observations and field reports, from the [Avalanche Explorer](https://forecasts.avalanche.state.co.us/explorer/)
