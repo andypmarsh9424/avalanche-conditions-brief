@@ -27,9 +27,9 @@ Which zones are trending worse, which are worth watching, and what's driving it.
 1. `python -m venv .venv` 
 2. `.venv\Scripts\activate` (Windows) or `source .venv/bin/activate` (Mac/Linux)
 3. `pip install -r requirements.txt` (Python 3.11, no API key needed)
-4. Add the SNOTEL stations you want to track (ID, name, county, reason) to stations_seed.csv
+4. Optional: edit stations_seed.csv to change which SNOTEL stations are tracked (ID, name, county, reason)
 5. `python build_stations.py` 
-6. Check logs/build_stations_%Y-%m-%d_%H%M%S.json for runtime logs and check 'status' 
+6. Check the newest file in logs/ (build_stations_<timestamp>.json); "status" should be SUCCESS
 7. More steps will be added as the pipeline grows
 
 ## Out of scope
@@ -38,8 +38,8 @@ Not a forecast and not safety advice. No accident or fatality data.
 ## Status
 - **COMPLETED**
   - Repo and seed file
-  - Station pipeline: validates the seed file, fetches metadata from the AWDB API with count checks and failure handling, writes stations.csv
-  - Wrote the station pipeline's error logs to logs/ instead of printing them in build_stations_%Y-%m-%d_%H%M%S.json
+  - Station pipeline: validates the seed file, fetches metadata from the AWDB API with count checks and failure handling, writes stations.csv 
+  - Run logs: each run writes a JSON log to logs/ with status, counts sent/returned/written, and any errors
 - **IN PROGRESS**
   - SNOTEL backfill
 - **NOT STARTED**
