@@ -12,6 +12,13 @@ def get_l7d():
 def get_l1d():
     return date.today() - timedelta(days=1)
 
+def date_match(response_date):
+    check_date = date.today() - timedelta(days=1)
+    if str(response_date) == str(check_date):
+        return True
+    else:
+        return False
+
 # 1. Read in stations.csv
 with open('stations.csv', newline='') as csvfile:
     reader = csv.DictReader(csvfile)
@@ -25,13 +32,13 @@ triplets = [
     for row in stations
 ]
 
-# 3. Stage L7D
+# 3. Stage begin and end date
 begin_date = get_l7d()
 end_date = get_l1d()
 
+error_log_api = []
 
-
-# 5. API Requests
+# 4. API Requests
 url = 'https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/data'
 payload = {'stationTriplets': ",".join(triplets),
            'elements': 'WTEQ',
@@ -43,7 +50,12 @@ try:
     response = requests.get(url, params=payload, timeout=10)
     response.raise_for_status()
     api_response = response.json()
-    print(api_response)
+    response_date = api_response[0]['data'][0]['values'][-1]['date']
+    if date_match(response_date) == False:
+        error_log_api.append({"reason": "date returned does not match expected value"})
+        print(error_log_api)
+    else:
+        print(api_response)
 except requests.exceptions.Timeout:
     print("timeout")
 except requests.exceptions.RequestException as e:
